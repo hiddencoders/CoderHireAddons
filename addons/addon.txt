@@ -1,0 +1,8 @@
+"AddonInfo"
+{
+	"name"		"Meth for DarkRP"
+	"version"	"2"
+	"author_name"	"Wolf"
+	"author_url"	"http://steamcommunity.com/id/SnowyWolf/"
+	"info"		""
+}
