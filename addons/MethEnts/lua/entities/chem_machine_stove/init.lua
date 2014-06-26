@@ -21,7 +21,6 @@ function ENT:Initialize()
 	self.Heat = 23
 	self.Speed = self.engineSpeed or 1
 	
-	self.MaxVoltage = self.engineLimit or 1200
 	self.Storage = 0
 	
 	self.healths = self.MaxHealth or 100
@@ -29,17 +28,15 @@ function ENT:Initialize()
 	
 	self.ID = self.ID or 6666
 	
-	self:SetUpDefault("Timers")
 	
 	self.MaterialType = "Item"
 	self.CraftName = self.CraftName or "Meth"
-	self:UpdateCables()
 end
 
 function ENT:PreInit()
-	self.WorldModelData = "models/props_vehicles/generatortrailer01.mdl" // How it should look like
-	self.CraftName = "Uncooked Meth" // Name
-	self.MaxHealth = 110 // Health. If its below 0, it'll explode, just like when overcooked, just with less damage
+	self.WorldModelData = "models/props_c17/furnitureStove001a.mdl" // How it should look like
+	self.CraftName = "Stove" // Name
+	self.MaxHealth = 500 // Health. If its below 0, it'll explode, just like when overcooked, just with less damage
 	self.ID = 14
 
 end

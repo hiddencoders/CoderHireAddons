@@ -1,5 +1,6 @@
 include("shared.lua")
 local ply = LocalPlayer()
+print("LOADING CL MODULE...")
 
 function ENT:Initialize()
 
@@ -9,10 +10,7 @@ function ENT:Draw()
 	self:DrawModel()
 	local ply = LocalPlayer()
 	
-		
-
-			
-	if ply:EyePos():Distance(self:GetPos()) >= 120 then 
+	if ply:EyePos():Distance(self:GetPos()) >= 700 then 
 		return 
 	end 
 	
@@ -26,9 +24,11 @@ function ENT:Draw()
 	else
 		 text = "Uncooked Meth"
 	end
-	local time = .. (math.floor((self:GetCooked() or 0)) )
+	local time = (math.floor((self:GetCooked())) )
 	
-	local min,sec = 0, 0
+	local min = 0
+	local sec = 0
+	
 	
 	if time > 60 then
 		min = math.floor(time / 60)
@@ -38,13 +38,21 @@ function ENT:Draw()
 		sec = time
 	end
 	
-	local owner = (min..":"..sec)
+	if sec < 0 then sec = 0 end
+	if min < 0 then min = 0 end
+	
+	local post = ""
+	
+	if min == 0 then min = "00" end
+	if sec < 10 then post = "0" else post = "" end
+	
+	local owner = (min..":"..post..sec)
 	
 	local TextWidth = surface.GetTextSize(text)
 	local TextWidth2 = surface.GetTextSize(owner)
 
 	
-	local offset = Vector( 0, 0, 90 )
+	local offset = Vector( 0, 0, 60 )
 	local ang = ply:EyeAngles()
 	local pos = self:GetPos() + offset + ang:Up()
  

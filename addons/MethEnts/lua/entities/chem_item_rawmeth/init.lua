@@ -4,7 +4,7 @@ include("shared.lua")
 
 function ENT:Initialize()	
 	self:PreInit()
-	self:SetModel(self.WorldModelData)
+	self:SetModel("models/props_c17/oildrum001.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
@@ -29,15 +29,10 @@ function ENT:Initialize()
 	
 	self.ID = self.ID or 6666
 	
-	self:SetUpDefault("Timers")
 	
-	self.money = math.random(MinCash, MaxCash)
-	self.OCT = math.random(MinOverCookTime, MaxOverCookTime)
+	self.money = math.random(1000, 3000)
+	self.OCT = math.random(120, 300)
 	
-	
-	self.MaterialType = "Item"
-	self.CraftName = self.CraftName or "Meth"
-	self:UpdateCables()
 end
 
 function ENT:PreInit()
@@ -53,10 +48,10 @@ function ENT:PreInit()
 	
 	self.TimeRequirement = 300
 	
-	self.MinOverCookTime = 120
+	self.MinOverCookTime = 10
 	self.MaxOverCookTime = 300
 	
-	self.OverCookBonus = 0.01
+	self.OverCookBonus = 0.03
 	// How its counted?
 	// The cash it would normally drop will be multiplied with that number, and then it would add to itself. EXAMPLE:
 	
@@ -73,7 +68,7 @@ function ENT:OverHeat()
 	self.ohing = true
 	self.OverHeatColor = Color(255, 100, 100, 255)
 	self:SetColor( self.OverHeatColor )
-	if self.cooking < - 10 then
+	if self.cooking < (-10) then
 		self:SetOverCooked( true )
 	end
 	self:SetDone( true )
@@ -106,9 +101,10 @@ function ENT:Explode( data )
 		local exp = "20"
 		if luck == 1 then exp = "40" elseif luck == 2 then exp = "80" elseif luck == 3 then exp = "120" elseif luck == 4 then exp = "160" elseif luck == 5 then exp = "200" end
 		self.Ownerply = self:GetOwner()
-		for k, v in pairs(ents.FindInSphere(self:GetPos(),200))
+		for k, v in pairs(ents.FindInSphere(self:GetPos(),200)) do
 			if v:IsValid() then v:Ignite() timer.Simple(5, function()
-				if v:IsValid() then v:Extinguish() end)
+					if v:IsValid() then v:Extinguish() end
+				end) 
 			end
 		end
 		local expval = tonumber(exp) + ( ( data / luck ) / 100)
@@ -134,10 +130,11 @@ end
 
 
 function ENT:Think()
-	self:SetCooked(self.cooked)
+	self:SetCooked((self.cooking or 0))
 	if (self.cooking < 0 ) and !self.ohing then 
 		self:OverHeat()
 	end
+	--print(self:GetDone())
 end
 
 function ENT:TriggerWork()
@@ -145,7 +142,7 @@ function ENT:TriggerWork()
 		self.cooking = self.cooking - 1
 		if self.cooking < 0 then
 			self:OverHeat()
-			if self.cooking + self.OCT >= 1 then
+			if self.cooking + (self.OCT or 30) <= 1 then
 				self:Explode( 1000 )
 			end
 		end
@@ -157,18 +154,18 @@ function ENT:OnRemove()
 end
 
 function ENT:DropCash(ply)
-	if self.cooked < 0 then
+ 	if self.cooking < 0 then
 		local addcash = 0
 		local def = self.money or 100
 		local div = self.OverCookBonus or 0.01
-		local sec = (0 - self.cooked ) or 0
+		local sec = (0 - self.cooking ) or 0
 		local mul = div * sec
 		local fin = def * mul
 		local addcash = math.floor(fin + def)
-		DarkRPCreateMoneyBag(self:GetPos() + Vector(15,0,0), addcash)
+		DarkRP.createMoneyBag(self:GetPos() + Vector(0,0,45), addcash)
 		ply:ChatPrint("You have sold the meth for $"..addcash.." !")
-	else
-		DarkRPCreateMoneyBag(self:GetPos() + Vector(15,0,0), self.money)
+	else 
+		DarkRP.createMoneyBag(self:GetPos() + Vector(0,0,45), self.money)
 		ply:ChatPrint("You have sold the meth for $"..self.money.." !")
 	end
 	self:Remove()
@@ -176,10 +173,13 @@ end
 
 function ENT:Use(activator,caller)
 	if IsValid(activator) and activator:IsPlayer() then
-		if self.Ready then
+	
+		if self:GetDone() then
 			self:DropCash(activator)
 		else
-			activator:ChatPrint("This is a not yet done barrel of meth. Cook it for "..self.cooked.." seconds to get money!")
+			if self.cooking < 0 then self.cooking = 0 end
+			ply:ChatPrint("SELF CASH:".. self.money .. " @ SELF OCT:"..self.OCT)
+			activator:ChatPrint("This is a not yet done barrel of meth. Cook it for "..self.cooking.." seconds to get money!")
 			activator:ChatPrint("Or cook it for longer to gather more money. However, if you overcook it, it might explode!")
 		end
 	end
